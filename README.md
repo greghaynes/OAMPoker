@@ -7,4 +7,4 @@ Requires python-requests library (http://docs.python-requests.org/en/latest/inde
 
 To run
 ------
-./run.py -u <username> -p <password>
+./run.py -u username -p password
