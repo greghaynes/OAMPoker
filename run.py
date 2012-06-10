@@ -43,7 +43,7 @@ def pass_changer(accountId, cur_passwd, new_passwd):
 				print 'Error!'
 				return
 
-	print 'Setting password to %s ...' % newpass,
+	print 'Setting password to %s ...' % new_passwd,
 	try:
 		set_pass(s, new_passwd)
 		print 'done'
