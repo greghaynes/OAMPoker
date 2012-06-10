@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 import requests
 
@@ -20,10 +21,12 @@ def pass_changer(accountId, cur_passwd, new_passwd):
 
 	s = requests.session()
 	print 'Initializing session...',
+	sys.stdout.flush()
 	r = s.post('https://oam.pdx.edu/idm/user/login.jsp')
 	print 'done'
 
 	print 'Logging in...',
+	sys.stdout.flush()
 	r = s.post('https://oam.pdx.edu/idm/user/login.jsp', data=payload)
 	print 'done'
 	if 'Welcome to the Odin Account Manager (OAM)' not in r.text:
@@ -36,6 +39,7 @@ def pass_changer(accountId, cur_passwd, new_passwd):
 		for i in range(10):
 			newpass = new_passwd + str(i)
 			print 'Setting password to %s ...' % newpass,
+			sys.stdout.flush()
 			try:
 				set_pass(s, new_passwd + str(i))
 				print 'done'
@@ -44,6 +48,7 @@ def pass_changer(accountId, cur_passwd, new_passwd):
 				return
 
 	print 'Setting password to %s ...' % new_passwd,
+	sys.stdout.flush()
 	try:
 		set_pass(s, new_passwd)
 		print 'done'
