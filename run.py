@@ -1,6 +1,7 @@
 #!/bin/env python
 import argparse
 import sys
+import time
 
 import requests
 
@@ -47,6 +48,10 @@ def pass_changer(accountId, cur_passwd, new_passwd):
 			except ValueError:
 				print 'Error!'
 				return
+			print 'Sleeping for 5 seconds ...',
+			sys.stdout.flush()
+			time.sleep(5)
+			print 'done'
 
 	print 'Setting password to %s ...' % new_passwd,
 	sys.stdout.flush()
