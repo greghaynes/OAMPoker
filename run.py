@@ -1,7 +1,22 @@
+import argparse
+
 import requests
 
-def pass_changer(accountId, passwd):
-	payload = {'accountId': accountId, 'password': passwd, 'id': '', 'command': 'login', 'activeControl': ''}
+def set_pass(session, new_pass):
+	r = session.post('https://oam.pdx.edu/idm/user/changePassword.jsp', {
+			'id': '',
+			'command': 'Save',
+			'activeControl': '',
+			'policyAcceptance': 'true',
+			'resourceAccounts.password': new_pass,
+			'resourceAccounts.confirmPassword': new_pass })
+	if 'AlrtMsgTxt' in r.text:
+		raise ValueError('Error setting new password')
+	else:
+		return r
+
+def pass_changer(accountId, cur_passwd, new_passwd):
+	payload = {'accountId': accountId, 'password': cur_passwd, 'id': '', 'command': 'login', 'activeControl': ''}
 
 	s = requests.session()
 	print 'Initializing session...',
@@ -16,24 +31,39 @@ def pass_changer(accountId, passwd):
 		return
 	else:
 		print 'Login success'
-	return
 
-	for i in range(10):
-		tmppass = passwd + str(i)
-		print 'Setting pass to %s...' % tmppass,
-		payload = {'id': '', 'command': 'Save', 'activeControl': '', 'policyAcceptance': 'true', 'resourceAccounts.password': tmppass, 'resourceAccounts.confirmPassword': tmppass}
-		r = s.post('https://oam.pdx.edu/idm/user/changePassword.jsp', data=payload)
+	if cur_passwd == new_passwd:
+		for i in range(10):
+			newpass = new_passwd + str(i)
+			print 'Setting password to %s ...' % newpass,
+			try:
+				set_pass(s, new_passwd + str(i))
+				print 'done'
+			except ValueError:
+				print 'Error!'
+				return
+
+	print 'Setting password to %s ...' % newpass,
+	try:
+		set_pass(s, new_passwd)
 		print 'done'
-		print r.text
-		return
-
-
-	print 'Setting pass to %s...' % passwd,
-	payload = {'id': '', 'command': 'Save', 'activeControl': '', 'policyAcceptance': 'true', 'resourceAccounts.password': passwd, 'resourceAccounts.confirmPassword': passwd}
-	r = s.post('https://oam.pdx.edu/idm/user/changePassword.jsp', data=payload)
-	print 'done'
+	except ValueError:
+		print 'Error!'
 
 if __name__=='__main__':
-	username = raw_input('Please enter your username or account ID: ')
-	passwd = raw_input('Please enter your password: ')
-	pass_changer(username, passwd)
+	# Arg parsing
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-p', '--passwd', dest='passwd',
+		help='Current password', required=True)
+	parser.add_argument('-u', '--user', dest='user',
+		help='Username or account ID', required=True)
+	parser.add_argument('-n', '--newpass', dest='newpass',
+		help='New password, undefined means reset to original password', required=False)
+	args = parser.parse_args()
+
+	if args.newpass:
+		newpass = args.newpass
+	else:
+		newpass = args.passwd
+	pass_changer(args.user, args.passwd, newpass)
+	
